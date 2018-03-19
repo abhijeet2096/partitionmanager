@@ -20,6 +20,7 @@
 #include "config/generalpagewidget.h"
 #include "config/filesystemcolorspagewidget.h"
 #include "config/advancedpagewidget.h"
+#include "config/programpagewidget.h"
 
 #include <backend/corebackendmanager.h>
 
@@ -47,6 +48,7 @@ ConfigureOptionsDialog::ConfigureOptionsDialog(QWidget* parent, const OperationS
     m_GeneralPageWidget(new GeneralPageWidget(this)),
     m_FileSystemColorsPageWidget(new FileSystemColorsPageWidget(this)),
     m_AdvancedPageWidget(new AdvancedPageWidget(this)),
+    m_ProgramPageWidget(new ProgramPageWidget(this)),
     m_OperationStack(ostack)
 {
     setFaceType(List);
@@ -61,6 +63,9 @@ ConfigureOptionsDialog::ConfigureOptionsDialog(QWidget* parent, const OperationS
 
     item = addPage(&fileSystemColorsPageWidget(), xi18nc("@title:tab", "File System Colors"), QString(), i18n("File System Color Settings"));
     item->setIcon(QIcon::fromTheme(QStringLiteral("format-fill-color")).pixmap(IconSize(KIconLoader::Desktop)));
+
+    item = addPage(&programPageWidget(), xi18nc("@title:tab program path settings", "Program"), QString(), i18n("Program Path Settings"));
+    item->setIcon(QIcon::fromTheme(QStringLiteral("preferences-other")).pixmap(IconSize(KIconLoader::Desktop)));
 
     item = addPage(&advancedPageWidget(), xi18nc("@title:tab advanced application settings", "Advanced"), QString(), i18n("Advanced Settings"));
     item->setIcon(QIcon::fromTheme(QStringLiteral("configure")).pixmap(IconSize(KIconLoader::Desktop)));

@@ -3,4 +3,5 @@ set(CONFIG_SRC
 	config/configureoptionsdialog.cpp
 	config/filesystemcolorspagewidget.cpp
 	config/generalpagewidget.cpp
+        config/programpagewidget.cpp
 )

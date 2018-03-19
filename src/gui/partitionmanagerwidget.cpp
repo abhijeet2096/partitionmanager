@@ -1,4 +1,4 @@
-/*************************************************************************
+	/*************************************************************************
  *  Copyright (C) 2008-2010 by Volker Lanz <vl@fidra.de>                 *
  *  Copyright (C) 2015 by Teo Mrnjavac <teo@kde.org>                     *
  *  Copyright (C) 2016 by Andrius Štikonas <andrius@stikonas.eu>         *

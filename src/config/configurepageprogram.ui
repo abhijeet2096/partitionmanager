@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ConfigurePageProgram</class>
+ <widget class="QWidget" name="ConfigurePageProgram">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>425</width>
+    <height>420</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QTabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
+       <widget class="QWidget" name="tab">
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <attribute name="title">
+         <string>Programs</string>
+        </attribute>
+        <widget class="QTreeWidget" name="treeWidget">
+         <property name="geometry">
+          <rect>
+           <x>5</x>
+           <y>21</y>
+           <width>391</width>
+           <height>261</height>
+          </rect>
+         </property>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Path</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Version</string>
+          </property>
+         </column>
+        </widget>
+       </widget>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>Permissions</string>
+        </attribute>
+        <widget class="QTreeWidget" name="treeWidget_2">
+         <property name="geometry">
+          <rect>
+           <x>15</x>
+           <y>11</y>
+           <width>371</width>
+           <height>271</height>
+          </rect>
+         </property>
+         <column>
+          <property name="text">
+           <string>Program</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Permissions</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>New Permissions</string>
+          </property>
+         </column>
+        </widget>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="geometry">
+          <rect>
+           <x>189</x>
+           <y>290</y>
+           <width>161</width>
+           <height>26</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Set Permission</string>
+         </property>
+        </widget>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item alignment="Qt::AlignRight">
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>Refresh</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
