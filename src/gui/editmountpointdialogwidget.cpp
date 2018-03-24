@@ -50,12 +50,14 @@ EditMountPointDialogWidget::EditMountPointDialogWidget(QWidget* parent, Partitio
     labelType().setText(partition().fileSystem().name());
 
     bool entryFound = false;
+    editPath().setEditable(true);
     for (auto &e : m_fstabEntries) {
         QString canonicalEntryPath = QFileInfo(e.deviceNode()).canonicalFilePath();
         QString canonicalDevicePath = QFileInfo(m_deviceNode).canonicalFilePath();
         if (canonicalEntryPath == canonicalDevicePath) { // FIXME fix multiple mountpoints
             entryFound = true;
-            entry = &e;
+            entry.append(&e);
+            mountPointList = possibleMountPoints(e.deviceNode());
         }
     }
 
@@ -75,15 +77,14 @@ EditMountPointDialogWidget::EditMountPointDialogWidget(QWidget* parent, Partitio
         }
 
         m_fstabEntries.append(FstabEntry(m_deviceNode, QString(), fsName, QString()));
-        entry = &m_fstabEntries.last();
+        entry.append(&m_fstabEntries.last());
     }
+    currentEntry = entry[0];
+    editPath().addItems(mountPointList);
+    spinDumpFreq().setValue(currentEntry->dumpFreq());
+    spinPassNumber().setValue(currentEntry->passNumber());
 
-    editPath().setText(entry->mountPoint());
-
-    spinDumpFreq().setValue(entry->dumpFreq());
-    spinPassNumber().setValue(entry->passNumber());
-
-    switch (entry->entryType()) {
+    switch (currentEntry->entryType()) {
     case FstabEntryType::uuid:
         radioUUID().setChecked(true);
         break;
@@ -116,7 +117,7 @@ EditMountPointDialogWidget::EditMountPointDialogWidget(QWidget* parent, Partitio
     boxOptions()[QStringLiteral("noexec")] = m_CheckNoExec;
     boxOptions()[QStringLiteral("relatime")] = m_CheckRelAtime;
 
-    setupOptions(entry->options());
+    setupOptions(currentEntry->options());
 
     if (partition().fileSystem().uuid().isEmpty()) {
         radioUUID().setEnabled(false);
@@ -132,6 +133,8 @@ EditMountPointDialogWidget::EditMountPointDialogWidget(QWidget* parent, Partitio
 
     connect(m_ButtonMore, &QPushButton::clicked, this, &EditMountPointDialogWidget::buttonMoreClicked);
     connect(m_ButtonSelect, &QPushButton::clicked, this, &EditMountPointDialogWidget::buttonSelectClicked);
+    connect(m_EditPath, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [=](int index){ currentEntry = entry[index]; });
 }
 
 EditMountPointDialogWidget::~EditMountPointDialogWidget()
@@ -154,21 +157,29 @@ void EditMountPointDialogWidget::setupOptions(const QStringList& options)
 
 void EditMountPointDialogWidget::buttonSelectClicked(bool)
 {
-    const QString s = QFileDialog::getExistingDirectory(this, editPath().text());
+    const QString s = QFileDialog::getExistingDirectory(this, editPath().currentText());
     if (!s.isEmpty())
-        editPath().setText(s);
+        editPath().setCurrentText(s);
 }
 
 void EditMountPointDialogWidget::removeMountPoint()
 {
     int i=0;
     for (const auto &e : fstabEntries()) {
-       if((e.fsSpec().contains(partition().deviceNode()) && !partition().deviceNode().isEmpty() ) || (e.fsSpec().contains(partition().fileSystem().uuid()) && !partition().fileSystem().uuid().isEmpty()) ||
-           (e.fsSpec().contains(partition().fileSystem().label()) && !partition().fileSystem().label().isEmpty()) || (e.fsSpec().contains(partition().label()) && !partition().label().isEmpty() ) || (e.fsSpec().contains(partition().uuid()) && !partition().uuid().isEmpty() ) )
+       if(editPath().count()<=1 && ((e.fsSpec().contains(partition().deviceNode()) && !partition().deviceNode().isEmpty() ) || (e.fsSpec().contains(partition().fileSystem().uuid()) && !partition().fileSystem().uuid().isEmpty()) ||
+           (e.fsSpec().contains(partition().fileSystem().label()) && !partition().fileSystem().label().isEmpty()) || (e.fsSpec().contains(partition().label()) && !partition().label().isEmpty() ) || (e.fsSpec().contains(partition().uuid()) && !partition().uuid().isEmpty()  )))
        {
             fstabEntries().removeAt(i);
             partition().setMountPoint(QString());
             i--;
+       }
+       else if(editPath().count()>1 && ((&e == currentEntry)))
+       {
+            fstabEntries().removeAt(i);
+            editPath().removeItem(editPath().currentIndex());
+            partition().setMountPoint(editPath().itemText(editPath().currentIndex()));
+            i--;
+            break;
         }
         i++;
     }
@@ -199,15 +210,15 @@ QStringList EditMountPointDialogWidget::options() const
 
 void EditMountPointDialogWidget::acceptChanges()
 {
-    entry->setDumpFreq(spinDumpFreq().value());
-    entry->setPassNumber(spinPassNumber().value());
-    entry->setMountPoint(editPath().text());
-    entry->setOptions(options());
+    currentEntry->setDumpFreq(spinDumpFreq().value());
+    currentEntry->setPassNumber(spinPassNumber().value());
+    currentEntry->setMountPoint(editPath().currentText());
+    currentEntry->setOptions(options());
 
     if (radioUUID().isChecked() && !partition().fileSystem().uuid().isEmpty())
-        entry->setFsSpec(QStringLiteral("UUID=") + partition().fileSystem().uuid());
+        currentEntry->setFsSpec(QStringLiteral("UUID=") + partition().fileSystem().uuid());
     else if (radioLabel().isChecked() && !partition().fileSystem().label().isEmpty())
-        entry->setFsSpec(QStringLiteral("LABEL=") + partition().fileSystem().label());
+        currentEntry->setFsSpec(QStringLiteral("LABEL=") + partition().fileSystem().label());
     else
-        entry->setFsSpec(m_deviceNode);
+        currentEntry->setFsSpec(m_deviceNode);
 }
