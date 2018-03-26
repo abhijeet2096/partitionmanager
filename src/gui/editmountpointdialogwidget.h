@@ -84,6 +84,7 @@ protected:
 
 private:
     void setupOptions(const QStringList& options);
+    void setupRadio(const FstabEntryType entryType);
     std::map<QString, QCheckBox*>& boxOptions() {
         return m_BoxOptions;
     }
@@ -108,6 +109,7 @@ private:
     QString m_deviceNode;
     QStringList mountPointList;
     std::map<QString, QCheckBox*> m_BoxOptions;
+    std::map<QString, QCheckBox*>::iterator iterator_BoxOptions;
 };
 
 #endif

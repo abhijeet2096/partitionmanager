@@ -84,7 +84,63 @@ EditMountPointDialogWidget::EditMountPointDialogWidget(QWidget* parent, Partitio
     spinDumpFreq().setValue(currentEntry->dumpFreq());
     spinPassNumber().setValue(currentEntry->passNumber());
 
-    switch (currentEntry->entryType()) {
+    boxOptions()[QStringLiteral("ro")] = m_CheckReadOnly;
+    boxOptions()[QStringLiteral("users")] = m_CheckUsers;
+    boxOptions()[QStringLiteral("noauto")] = m_CheckNoAuto;
+    boxOptions()[QStringLiteral("noatime")] = m_CheckNoAtime;
+    boxOptions()[QStringLiteral("nodiratime")] = m_CheckNoDirAtime;
+    boxOptions()[QStringLiteral("sync")] = m_CheckSync;
+    boxOptions()[QStringLiteral("noexec")] = m_CheckNoExec;
+    boxOptions()[QStringLiteral("relatime")] = m_CheckRelAtime;
+
+    setupRadio(currentEntry->entryType());
+    setupOptions(currentEntry->options());
+
+    connect(m_ButtonMore, &QPushButton::clicked, this, &EditMountPointDialogWidget::buttonMoreClicked);
+    connect(m_ButtonSelect, &QPushButton::clicked, this, &EditMountPointDialogWidget::buttonSelectClicked);
+    connect(m_EditPath, QOverload<int>::of(&QComboBox::currentIndexChanged),
+        [=](int index){ currentEntry = entry[index];
+                        spinDumpFreq().setValue(currentEntry->dumpFreq());
+                        spinPassNumber().setValue(currentEntry->passNumber());
+                        setupRadio(currentEntry->entryType());
+                        for (iterator_BoxOptions = boxOptions().begin(); iterator_BoxOptions != boxOptions().end(); ++iterator_BoxOptions){
+                            boxOptions()[iterator_BoxOptions->first]->setChecked(false);
+                        }
+                        setupOptions(currentEntry->options());
+                      });
+}
+
+EditMountPointDialogWidget::~EditMountPointDialogWidget()
+{
+}
+
+void EditMountPointDialogWidget::setupOptions(const QStringList& options)
+{
+    QStringList optTmpList;
+    for (const auto &o : options) {
+        if (boxOptions().find(o) != boxOptions().end())
+            boxOptions()[o]->setChecked(true);
+        else
+            optTmpList.append(o);
+    }
+
+    m_Options = optTmpList.join(QLatin1Char(','));
+}
+
+void EditMountPointDialogWidget::setupRadio(const FstabEntryType entryType)
+{
+    if (partition().fileSystem().uuid().isEmpty()) {
+        radioUUID().setEnabled(false);
+        if (radioUUID().isChecked())
+            radioDeviceNode().setChecked(true);
+    }
+
+    if (partition().fileSystem().label().isEmpty()) {
+        radioLabel().setEnabled(false);
+        if (radioLabel().isChecked())
+            radioDeviceNode().setChecked(true);
+    }
+    switch (entryType) {
     case FstabEntryType::uuid:
         radioUUID().setChecked(true);
         break;
@@ -107,52 +163,6 @@ EditMountPointDialogWidget::EditMountPointDialogWidget(QWidget* parent, Partitio
     case FstabEntryType::comment:
         break;
     }
-
-    boxOptions()[QStringLiteral("ro")] = m_CheckReadOnly;
-    boxOptions()[QStringLiteral("users")] = m_CheckUsers;
-    boxOptions()[QStringLiteral("noauto")] = m_CheckNoAuto;
-    boxOptions()[QStringLiteral("noatime")] = m_CheckNoAtime;
-    boxOptions()[QStringLiteral("nodiratime")] = m_CheckNoDirAtime;
-    boxOptions()[QStringLiteral("sync")] = m_CheckSync;
-    boxOptions()[QStringLiteral("noexec")] = m_CheckNoExec;
-    boxOptions()[QStringLiteral("relatime")] = m_CheckRelAtime;
-
-    setupOptions(currentEntry->options());
-
-    if (partition().fileSystem().uuid().isEmpty()) {
-        radioUUID().setEnabled(false);
-        if (radioUUID().isChecked())
-            radioDeviceNode().setChecked(true);
-    }
-
-    if (partition().fileSystem().label().isEmpty()) {
-        radioLabel().setEnabled(false);
-        if (radioLabel().isChecked())
-            radioDeviceNode().setChecked(true);
-    }
-
-    connect(m_ButtonMore, &QPushButton::clicked, this, &EditMountPointDialogWidget::buttonMoreClicked);
-    connect(m_ButtonSelect, &QPushButton::clicked, this, &EditMountPointDialogWidget::buttonSelectClicked);
-    connect(m_EditPath, QOverload<int>::of(&QComboBox::currentIndexChanged),
-        [=](int index){ currentEntry = entry[index]; });
-}
-
-EditMountPointDialogWidget::~EditMountPointDialogWidget()
-{
-}
-
-void EditMountPointDialogWidget::setupOptions(const QStringList& options)
-{
-    QStringList optTmpList;
-
-    for (const auto &o : options) {
-        if (boxOptions().find(o) != boxOptions().end())
-            boxOptions()[o]->setChecked(true);
-        else
-            optTmpList.append(o);
-    }
-
-    m_Options = optTmpList.join(QLatin1Char(','));
 }
 
 void EditMountPointDialogWidget::buttonSelectClicked(bool)
